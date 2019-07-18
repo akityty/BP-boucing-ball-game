@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<div id="displayGameBoard"></div>
+<script>
+    function GameBoard(widthOfBoard, heightOfBoard) {
+        this.widthOfBoard = widthOfBoard;
+        this.heightOfBoard = heightOfBoard;
+        this.getWidthOfBoard = function () {
+            return this.widthOfBoard;
+        };
+        this.getHeightOfBoard = function () {
+            return this.heightOfBoard;
+        };
+        this.drawBoard = function () {
+            var myCanvas = "<canvas id='myCanvas' width='" + this.widthOfBoard + "' height='" + this.heightOfBoard + "'" +
+                "style='border: 2px solid black;'></canvas>";
+            document.getElementById("displayGameBoard").innerHTML = myCanvas;
+        };
+    }
+
+    function Ball(x, y, radius, cornerMove, speed) {
+        this.x = x;
+        this.y = y;
+        this.radius = radius;
+        this.cornerMove = cornerMove;
+        this.speed = speed;
+        this.getX = function () {
+            return this.x;
+        };
+        this.getY = function () {
+            return this.y;
+        };
+        this.getRadius = function () {
+            return this.radius;
+        };
+        this.getCornerMove = function () {
+            return this.cornerMove;
+        };
+        this.getSpeed = function () {
+            return this.speed;
+        };
+        this.moveRightDown = function () {
+            this.x += 5;
+            this.y += 5;
+        };
+        this.moveRightUp = function () {
+            this.x += 5;
+            this.y -= 5;
+        };
+        this.moveLeftUp = function () {
+            this.x -= 5;
+            this.y -= 5;
+        };
+        this.moveLeftDown = function () {
+            this.x -= 5;
+            this.y += 5;
+        };
+    }
+
+    function Bar(x, widthBar,y) {
+        this.x = x;
+        this.widthBar = widthBar;
+        this.y = y;
+        this.moveLeft = function () {
+            this.x -= 10;
+        };
+        this.moveRight = function () {
+            this.x += 10;
+        };
+    }
+
+    function selectionMove(evt) {
+        if ((evt.keyCode === 37) && (bar.x >= 0)) {
+            bar.moveLeft();
+        }
+        if ((evt.keyCode === 39) && (bar.x + bar.widthBar <= WIDTH_OF_BOARD)) {
+            bar.moveRight();
+        }
+    }
+
+    function drawAndMove() {
+        var ctxBall = document.getElementById("myCanvas").getContext('2d');
+        ctxBall.clearRect(0, 0, WIDTH_OF_BOARD, HEIGHT_OF_BOARD);
+        ctxBall.beginPath();
+        ctxBall.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI);
+        ctxBall.fillStyle = "red";
+        ctxBall.fill();
+        console.log("width: " + ball.x + " height: " + ball.y);
+        changeMove(ball);
+        switch (choiceMove) {
+            case 1:
+                ball.moveRightDown();
+                rememberMoveStep = 1;
+                break;
+            case 2:
+                ball.moveRightUp();
+                rememberMoveStep = 2;
+                break;
+            case 3:
+                ball.moveLeftUp();
+                rememberMoveStep = 3;
+                break;
+            case 4:
+                ball.moveLeftDown();
+                rememberMoveStep = 4;
+                break;
+        }
+        ctxBall.closePath();
+        var ctxBar = document.getElementById("myCanvas").getContext('2d');
+        ctxBar.beginPath();
+        ctxBar.fillRect(bar.x, HEIGHT_OF_BOARD - 10, bar.widthBar, 10);
+        ctxBar.fillStyle = "blue";
+        setTimeout(drawAndMove, 30);
+        checkContact();
+    }
+
+    function changeMove(ball) {
+            if (ball.x <= 0) {
+                if (ball.y <= 0) {
+                    choiceMove = 1;
+                } else if (ball.y >= HEIGHT_OF_BOARD) {
+                    choiceMove = 3;
+                } else if (rememberMoveStep === 3) {
+                    choiceMove = 2;
+                } else if (rememberMoveStep === 4) {
+                    choiceMove = 1;
+                }
+            }
+            if (ball.y <= 0) {
+                if (ball.x >= WIDTH_OF_BOARD) {
+                    choiceMove = 4;
+                } else if (rememberMoveStep === 3) {
+                    choiceMove = 4;
+                } else if (rememberMoveStep === 2) {
+                    choiceMove = 1;
+                }
+            }
+            if (ball.x >= WIDTH_OF_BOARD) {
+                if (ball.y >= HEIGHT_OF_BOARD) {
+                    choiceMove = 3;
+                } else if (rememberMoveStep === 2) {
+                    choiceMove = 3;
+                } else if (rememberMoveStep === 1) {
+                    choiceMove = 4;
+                }
+            }
+            if ((ball.y >= HEIGHT_OF_BOARD - 10) && (ball.x <= bar.x + bar.widthBar) && (ball.x >= bar.x)) {
+                if (rememberMoveStep === 1) {
+                    choiceMove = 2;
+                } else if (rememberMoveStep === 4) {
+                    choiceMove = 3;
+                }
+            }
+        }
+
+    function checkContact() {
+
+        if (((ball.y === HEIGHT_OF_BOARD) && (ball.x < bar.x) || (ball.y === HEIGHT_OF_BOARD) && (ball.x > bar.x +bar.widthBar))) {
+            alert("game over");
+        }
+    }
+
+    const WIDTH_OF_BOARD = 300;
+    const HEIGHT_OF_BOARD = 500;
+    let choiceMove = 1;
+    let rememberMoveStep = 1;
+    let gameboard = new GameBoard(WIDTH_OF_BOARD, HEIGHT_OF_BOARD);
+    let ball = new Ball(0, 0, 5, 0, 0);
+    let bar = new Bar((WIDTH_OF_BOARD / 2) - 25, 50,HEIGHT_OF_BOARD-10);
+    window.addEventListener('keydown', selectionMove);
+    gameboard.drawBoard();
+    drawAndMove();
+
+
+
+</script>
+</body>
+</html>
